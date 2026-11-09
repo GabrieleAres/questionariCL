@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <base target="_top">
+
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Questionario</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px 16px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #1f2937;
+      background:
+        linear-gradient(
+          135deg,
+          #f4f7fb 0%,
+          #eaf1f8 100%
+        );
+    }
+
+    .container {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      color: #17324d;
+    }
+
+    .header p {
+      margin: 0;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .card {
+      padding: 32px;
+      background: #ffffff;
+      border: 1px solid #dbe4ee;
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 8px;
+      margin-bottom: 32px;
+      overflow: hidden;
+      background: #e7edf3;
+      border-radius: 999px;
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      background: #2563eb;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .question-number {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #1d4ed8;
+      background: #dbeafe;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .question-title {
+      margin: 0 0 10px;
+      font-size: 24px;
+      line-height: 1.35;
+      color: #172033;
+    }
+
+    .question-description {
+      margin: 0 0 24px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    .field {
+      margin-bottom: 22px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 9px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .required {
+      color: #dc2626;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 13px 14px;
+      font: inherit;
+      color: #1f2937;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      outline: none;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .option {
+      position: relative;
+    }
+
+    .option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .option label {
+      display: flex;
+      min-height: 54px;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .option label:hover {
+      background: #eff6ff;
+      border-color: #93c5fd;
+    }
+
+    .option input:checked + label {
+      color: #1d4ed8;
+      background: #dbeafe;
+      border-color: #2563eb;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    button {
+      min-height: 46px;
+      padding: 11px 22px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      transition:
+        transform 0.15s ease,
+        opacity 0.15s ease,
+        background-color 0.15s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .btn-secondary {
+      color: #334155;
+      background: #e2e8f0;
+    }
+
+    .btn-primary {
+      color: #ffffff;
+      background: #2563eb;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #1d4ed8;
+    }
+
+    .error {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      color: #991b1b;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+    }
+
+    .success {
+      display: none;
+      text-align: center;
+    }
+
+    .success-icon {
+      display: flex;
+      width: 74px;
+      height: 74px;
+      margin: 0 auto 18px;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      color: #166534;
+      background: #dcfce7;
+      border-radius: 50%;
+    }
+
+    .success h2 {
+      margin: 0 0 10px;
+      color: #166534;
+    }
+
+    .success p {
+      color: #64748b;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 16px 10px;
+      }
+
+      .card {
+        padding: 22px 18px;
+        border-radius: 15px;
+      }
+
+      .header h1 {
+        font-size: 25px;
+      }
+
+      .question-title {
+        font-size: 21px;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .buttons {
+        flex-direction: column-reverse;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header class="header">
+      <h1>Questionario di verifica</h1>
+      <p>
+        Rispondi alle domande e inserisci eventuali osservazioni.
+        Verrà visualizzata una domanda alla volta.
+      </p>
+    </header>
+
+    <section class="card">
+      <div id="questionario">
+        <div class="progress-info">
+          <span id="stepText">Dati iniziali</span>
+          <span id="percentuale">0%</span>
+        </div>
+
+        <div class="progress-container">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <div id="contenutoStep"></div>
+
+        <div id="errore" class="error"></div>
+
+        <div class="buttons">
+          <button
+            id="btnIndietro"
+            class="btn-secondary"
+            type="button"
+            onclick="indietro()"
+          >
+            Indietro
+          </button>
+
+          <button
+            id="btnAvanti"
+            class="btn-primary"
+            type="button"
+            onclick="avanti()"
+          >
+            Avanti
+          </button>
+        </div>
+      </div>
+
+      <div id="successo" class="success">
+        <div class="success-icon">✓</div>
+
+        <h2>Questionario inviato</h2>
+
+        <p>
+          Le risposte sono state registrate correttamente.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /*
+     * Modifica questo elenco per inserire le tue domande.
+     *
+     * obbligatoria: true
+     * significa che l'utente deve selezionare una risposta.
+     */
+    const domande = [
+      {
+        id: "d1",
+        testo: "La macchina presenta la marcatura CE?",
+        descrizione:
+          "Controllare la presenza della marcatura sulla macchina " +
+          "o sulla targhetta identificativa.",
+        obbligatoria: true
+      },
+      {
+        id: "d2",
+        testo: "È disponibile la dichiarazione di conformità?",
+        descrizione:
+          "Verificare se il documento è disponibile e riferito " +
+          "alla macchina esaminata.",
+        obbligatoria: true
+      },
+      {
+        id: "d3",
+        testo: "È disponibile il manuale di uso e manutenzione?",
+        descrizione:
+          "Il manuale deve essere coerente con il modello e con " +
+          "la matricola della macchina.",
+        obbligatoria: true
+      },
+      {
+        id: "d4",
+        testo: "I dispositivi di protezione risultano integri?",
+        descrizione:
+          "Controllare ripari, interblocchi, barriere e altri " +
+          "dispositivi presenti.",
+        obbligatoria: true
+      }
+    ];
+
+    let stepCorrente = 0;
+
+    const datiGenerali = {
+      nome: "",
+      email: ""
+    };
+
+    const risposte = domande.map(domanda => ({
+      id: domanda.id,
+      domanda: domanda.testo,
+      risposta: "",
+      note: ""
+    }));
+
+    document.addEventListener("DOMContentLoaded", () => {
+      mostraStep();
+    });
+
+    function mostraStep() {
+      nascondiErrore();
+
+      const contenitore = document.getElementById("contenutoStep");
+      const btnIndietro = document.getElementById("btnIndietro");
+      const btnAvanti = document.getElementById("btnAvanti");
+
+      salvaValoriVisualizzati();
+
+      if (stepCorrente === 0) {
+        contenitore.innerHTML = creaStepIniziale();
+      } else {
+        const indiceDomanda = stepCorrente - 1;
+        contenitore.innerHTML = creaStepDomanda(indiceDomanda);
+      }
+
+      btnIndietro.style.visibility =
+        stepCorrente === 0 ? "hidden" : "visible";
+
+      btnAvanti.textContent =
+        stepCorrente === domande.length
+          ? "Invia questionario"
+          : "Avanti";
+
+      aggiornaAvanzamento();
+    }
+
+    function creaStepIniziale() {
+      return `
+        <div class="step active">
+          <span class="question-number">Dati iniziali</span>
+
+          <h2 class="question-title">
+            Informazioni del compilatore
+          </h2>
+
+          <p class="question-description">
+            Inserisci i dati della persona che sta compilando
+            il questionario.
+          </p>
+
+          <div class="field">
+            <label class="field-label" for="nome">
+              Nome e cognome
+              <span class="required">*</span>
+            </label>
+
+            <input
+              id="nome"
+              type="text"
+              value="${escapeHtml(datiGenerali.nome)}"
+              autocomplete="name"
+            >
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="email">
+              Email
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              value="${escapeHtml(datiGenerali.email)}"
+              autocomplete="email"
+            >
+          </div>
+        </div>
+      `;
+    }
+
+    function creaStepDomanda(indice) {
+      const domanda = domande[indice];
+      const rispostaSalvata = risposte[indice];
+
+      return `
+        <div class="step active">
+          <span class="question-number">
+            Domanda ${indice + 1} di ${domande.length}
+          </span>
+
+          <h2 class="question-title">
+            ${escapeHtml(domanda.testo)}
+          </h2>
+
+          <p class="question-description">
+            ${escapeHtml(domanda.descrizione || "")}
+          </p>
+
+          <div class="field">
+            <span class="field-label">
+              Seleziona una risposta
+              ${domanda.obbligatoria
+                ? '<span class="required">*</span>'
+                : ''}
+            </span>
+
+            <div class="options">
+              ${creaOpzione(
+                domanda.id,
+                "SI",
+                rispostaSalvata.risposta
+              )}
+
+              ${creaOpzione(
+                domanda.id,
+                "NO",
+                rispostaSalvata.risposta
+              )}
+
+              ${creaOpzione(
+                domanda.id,
+                "N.A.",
+                rispostaSalvata.risposta
+              )}
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="note">
+              Note e osservazioni
+            </label>
+
+            <textarea
+              id="note"
+              placeholder="Inserisci eventuali note..."
+            >${escapeHtml(rispostaSalvata.note)}</textarea>
+          </div>
+        </div>
+      `;
+    }
+
+    function creaOpzione(nome, valore, valoreSelezionato) {
+      const checked =
+        valore === valoreSelezionato ? "checked" : "";
+
+      return `
+        <div class="option">
+          <input
+            id="${nome}_${valore.replaceAll(".", "")}"
+            type="radio"
+            name="risposta"
+            value="${valore}"
+            ${checked}
+          >
+
+          <label for="${nome}_${valore.replaceAll(".", "")}">
+            ${valore}
+          </label>
+        </div>
+      `;
+    }
+
+    function salvaValoriVisualizzati() {
+      if (stepCorrente === 0) {
+        const nome = document.getElementById("nome");
+        const email = document.getElementById("email");
+
+        if (nome) {
+          datiGenerali.nome = nome.value.trim();
+        }
+
+        if (email) {
+          datiGenerali.email = email.value.trim();
+        }
+
+        return;
+      }
+
+      const indiceDomanda = stepCorrente - 1;
+      const rispostaSelezionata = document.querySelector(
+        'input[name="risposta"]:checked'
+      );
+      const note = document.getElementById("note");
+
+      if (!risposte[indiceDomanda]) {
+        return;
+      }
+
+      risposte[indiceDomanda].risposta =
+        rispostaSelezionata
+          ? rispostaSelezionata.value
+          : "";
+
+      risposte[indiceDomanda].note =
+        note ? note.value.trim() : "";
+    }
+
+    function validaStep() {
+      salvaValoriVisualizzati();
+
+      if (stepCorrente === 0) {
+        if (!datiGenerali.nome) {
+          mostraErrore("Inserisci il nome e cognome.");
+          return false;
+        }
+
+        if (
+          datiGenerali.email &&
+          !emailValida(datiGenerali.email)
+        ) {
+          mostraErrore("Inserisci un indirizzo email valido.");
+          return false;
+        }
+
+        return true;
+      }
+
+      const indiceDomanda = stepCorrente - 1;
+      const domanda = domande[indiceDomanda];
+      const risposta = risposte[indiceDomanda];
+
+      if (
+        domanda.obbligatoria &&
+        !risposta.risposta
+      ) {
+        mostraErrore(
+          "Seleziona una risposta prima di continuare."
+        );
+
+        return false;
+      }
+
+      /*
+       * Esempio di validazione aggiuntiva:
+       * se la risposta è NO, le note diventano obbligatorie.
+       */
+      if (
+        risposta.risposta === "NO" &&
+        !risposta.note
+      ) {
+        mostraErrore(
+          "Quando selezioni NO devi inserire una nota."
+        );
+
+        return false;
+      }
+
+      return true;
+    }
+
+    function avanti() {
+      if (!validaStep()) {
+        return;
+      }
+
+      if (stepCorrente < domande.length) {
+        stepCorrente++;
+        mostraStep();
+        tornaInAlto();
+        return;
+      }
+
+      inviaQuestionario();
+    }
+
+    function indietro() {
+      salvaValoriVisualizzati();
+
+      if (stepCorrente > 0) {
+        stepCorrente--;
+        mostraStep();
+        tornaInAlto();
+      }
+    }
+
+    
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbwo8kz9ysUO7wPrJd6Aa5_uh1DH6aj9TPKREdHdo9yX9b9c-ifvYcURzyuLF5A2PhxQyg/exec";
+
+async function inviaQuestionario() {
+  salvaValoriVisualizzati();
+
+  const btnAvanti = document.getElementById("btnAvanti");
+  const btnIndietro = document.getElementById("btnIndietro");
+
+  btnAvanti.disabled = true;
+  btnIndietro.disabled = true;
+  btnAvanti.textContent = "Invio in corso...";
+
+  const dati = {
+    nome: datiGenerali.nome,
+    email: datiGenerali.email,
+    risposte: risposte
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(dati)
+    });
+
+    onSalvataggioCompletato({
+      success: true
+    });
+
+  } catch (errore) {
+    onErroreSalvataggio(errore);
+  }
+}
+
+
+    function onSalvataggioCompletato(risultato) {
+      document.getElementById("questionario").style.display = "none";
+      document.getElementById("successo").style.display = "block";
+
+      console.log(
+        "Questionario salvato:",
+        risultato
+      );
+    }
+
+    function onErroreSalvataggio(errore) {
+      const btnAvanti = document.getElementById("btnAvanti");
+      const btnIndietro = document.getElementById("btnIndietro");
+
+      btnAvanti.disabled = false;
+      btnIndietro.disabled = false;
+      btnAvanti.textContent = "Invia questionario";
+
+      mostraErrore(
+        "Errore durante il salvataggio: " +
+        (errore.message || errore)
+      );
+    }
+
+    function aggiornaAvanzamento() {
+      const totaleStep = domande.length + 1;
+      const percentuale = Math.round(
+        (stepCorrente / totaleStep) * 100
+      );
+
+      const stepText = document.getElementById("stepText");
+
+      if (stepCorrente === 0) {
+        stepText.textContent = "Dati iniziali";
+      } else {
+        stepText.textContent =
+          `Domanda ${stepCorrente} di ${domande.length}`;
+      }
+
+      document.getElementById("percentuale").textContent =
+        `${percentuale}%`;
+
+      document.getElementById("progressBar").style.width =
+        `${percentuale}%`;
+    }
+
+    function mostraErrore(messaggio) {
+      const elemento = document.getElementById("errore");
+
+      elemento.textContent = messaggio;
+      elemento.style.display = "block";
+    }
+
+    function nascondiErrore() {
+      const elemento = document.getElementById("errore");
+
+      elemento.textContent = "";
+      elemento.style.display = "none";
+    }
+
+    function tornaInAlto() {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    function emailValida(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function escapeHtml(valore) {
+      return String(valore ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>
